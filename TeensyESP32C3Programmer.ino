@@ -20,7 +20,7 @@ extern "C" {
 #include "src/esp_loader_io.h"
 }
 
-#define EN_OLD_DTRRTS 1
+#define EN_OLD_DTRRTS 0 // old not working
 
 // Recommended for ESP32-C3 native USB: wire these Teensy GPIOs to ESP EN and BOOT.
 // Leave as 255 to use USB CDC DTR/RTS only, but native USB boards often do not
