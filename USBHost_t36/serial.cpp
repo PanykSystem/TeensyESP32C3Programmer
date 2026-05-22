@@ -1432,93 +1432,13 @@ size_t USBSerialBase::write(uint8_t c)
 bool USBSerialBase::setDTR(bool fSet)
 {
 	println("setDTR: ", fSet, DEC);
-	if (!device) return false;
-	// NOT sure if we should check pending control and not allow it? OR???
-	if (fSet) dtr_rts_ |= 1;
-	else dtr_rts_ &= ~1;
-
-	if (sertype == CDCACM) {
-		return setControlLines((dtr_rts_ & 1) != 0, (dtr_rts_ & 2) != 0);
-	}
-
-	switch (sertype) {
-		default: 
-			return false; // Not sure how to do...
-		case PL2303:
-		case CDCACM: 
-			mk_setup(setup, 0x21, 0x22, dtr_rts_, (sertype == CDCACM) ? cdc_control_interface : 0, 0);
-			break;
-		case FTDI: 
-			println("  >>FTDI");
-			// The high 8 is mask and low 8 is setting. 
-			mk_setup(setup, 0x40, 1, fSet? 0x0101 : 0x0100, 0, 0);
-			break;
-		// not sure yet on these	
-		//case CH341: 
-		case CP210X: 
-			// DTR(1) RTS(2)
-			mk_setup(setup, 0x41, 7, fSet? 0x0101 : 0x0100, 0, 0);
-			break;
-	}
-
-	pending_control = 0;
-	control_queued = true;
-	queue_Control_Transfer(device, &setup, NULL, this);
-
-	// Lets wait until sent.. 
-	elapsedMillis em;
-	while (control_queued && (em < 500)) {
-		yield();	// not sure if we want to yield or what? 
-	}
-	if (control_queued)println("setDtr: message timeout");
-	return true;
+	return setControlLines(fSet, (dtr_rts_ & 2) != 0);
 }
 
-// Lets split this up fro setting both
 bool USBSerialBase::setRTS(bool fSet)
 {
 	println("setRTS: ", fSet, DEC);
-	if (fSet) dtr_rts_ |= 2;
-	else dtr_rts_ &= ~2;
-
-	if (!device) return false;
-	// NOT sure if we should check pending control and not allow it? OR???
-
-	if (sertype == CDCACM) {
-		return setControlLines((dtr_rts_ & 1) != 0, (dtr_rts_ & 2) != 0);
-	}
-
-	switch (sertype) {
-		default: 
-			return false; // Not sure how to do...
-		case PL2303:
-		case CDCACM: 
-			mk_setup(setup, 0x21, 0x22, dtr_rts_, (sertype == CDCACM) ? cdc_control_interface : 0, 0);
-			break;
-		case FTDI: 
-			println("  >>FTDI");
-			// The high 8 is mask and low 8 is setting. 
-			mk_setup(setup, 0x40, 1, fSet? 0x0202 : 0x0200, 0, 0);
-			break;
-		// not sure yet on these	
-		//case CH341: 
-		case CP210X: 
-			// DTR(1) RTS(2)
-			mk_setup(setup, 0x41, 7, fSet? 0x0202 : 0x0200, 0, 0);
-			break;
-	}
-
-	pending_control = 0;
-	control_queued = true;
-	queue_Control_Transfer(device, &setup, NULL, this);
-
-	// Lets wait until sent.. 
-	elapsedMillis em;
-	while (control_queued && (em < 500)) {
-		yield();	// not sure if we want to yield or what? 
-	}
-	if (control_queued)println("setRTS: message timeout");
-	return true;
+	return setControlLines((dtr_rts_ & 1) != 0, fSet);
 }
 
 bool USBSerialBase::setControlLines(bool dtr, bool rts)

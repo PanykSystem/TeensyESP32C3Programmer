@@ -425,6 +425,22 @@ public:
         Device_t *dev = *(Device_t * volatile *)&device;
         return (dev != nullptr) ? dev->idProduct : 0;
     }
+    uint8_t usbAddress() {
+        Device_t *dev = *(Device_t * volatile *)&device;
+        return (dev != nullptr) ? dev->address : 0;
+    }
+    uint8_t hubAddress() {
+        Device_t *dev = *(Device_t * volatile *)&device;
+        return (dev != nullptr) ? dev->hub_address : 0;
+    }
+    uint8_t hubPort() {
+        Device_t *dev = *(Device_t * volatile *)&device;
+        return (dev != nullptr) ? dev->hub_port : 0;
+    }
+    uint8_t usbSpeed() {
+        Device_t *dev = *(Device_t * volatile *)&device;
+        return (dev != nullptr) ? dev->speed : 0;
+    }
     const uint8_t *manufacturer() {
         Device_t *dev = *(Device_t * volatile *)&device;
         if (dev == nullptr || dev->strbuf == nullptr) return nullptr;
